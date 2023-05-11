@@ -1,4 +1,3 @@
-# Clustering-and-fitting
 import pandas as pd
 
 # load the dataset for Forest area (% of land area)
@@ -90,7 +89,6 @@ plt.xlabel("Number of Clusters")
 plt.ylabel("Within-Cluster Sum of Squares (WCSS)")
 plt.title("Elbow Curve: Optimal Number of Clusters")
 plt.show()
-
 
 import pandas as pd
 import numpy as np
@@ -196,6 +194,7 @@ plt.grid(True)
 plt.show()
 
 
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -203,7 +202,7 @@ import matplotlib.pyplot as plt
 # Load the cleaned dataset
 df = pd.read_csv('fitting_data.csv')
 
-# Filter data for Nigeria
+# Filter data for Brazil
 brazil_data = df[df['Country'] == 'Brazil']
 
 # Extract the necessary columns
@@ -225,8 +224,10 @@ future_years = np.arange(years.min(), years.max() + 21)  # Predict for 20 additi
 predicted_values = poly_func(future_years)
 
 # Calculate confidence ranges
-sigma = np.sqrt(np.diag(pcov))
-lower, upper = err_ranges(future_years, polynomial_model, popt, sigma)
+cov_matrix = np.cov(years, values, ddof=0)
+sigma = np.sqrt(np.diag(cov_matrix))
+lower_bound = predicted_values - 1.96 * std_dev
+upper_bound = predicted_values + 1.96 * std_dev
 
 # Plot the best fitting function and confidence range
 plt.figure(figsize=(12, 8), dpi=80)  # Set fixed dimensions for the figure
@@ -239,6 +240,9 @@ plt.title('Polynomial Model Fit for Brazil', fontsize=16)
 plt.legend(fontsize=12)
 plt.grid(True)
 plt.show()
+
+
+
 
 
 
