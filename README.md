@@ -92,6 +92,155 @@ plt.title("Elbow Curve: Optimal Number of Clusters")
 plt.show()
 
 
+import pandas as pd
+import numpy as np
+from sklearn.preprocessing import StandardScaler
+from sklearn.mixture import GaussianMixture
+import matplotlib.pyplot as plt
+
+# Load the cleaned dataset
+df = pd.read_csv('clustering_dataset.csv')
+
+# Extract Forest rents column and normalize the data
+X = df['Forest rents (% of GDP)'].values.reshape(-1, 1)
+X_norm = StandardScaler().fit_transform(X)
+
+# Perform Gaussian Mixture Model clustering with n_clusters=4
+gmm = GaussianMixture(n_components=4, random_state=42)
+gmm.fit(X_norm)
+df['Cluster'] = gmm.predict(X_norm)
+
+# Plot the results
+fig, ax = plt.subplots(figsize=(12, 8))
+colors = ['red', 'green', 'blue', 'orange']  # Add more colors if needed
+for i in range(4):
+    cluster_data = df[df['Cluster'] == i]
+    scatter = ax.scatter(cluster_data.index, cluster_data['Forest rents (% of GDP)'],
+                         color=colors[i], label=f'Cluster {i+1}')
+plt.xticks(np.arange(0, df.shape[0], 50), np.arange(0, df.shape[0], 50), fontsize=12)
+plt.xlabel('Country Index', fontsize=14)
+plt.ylabel('Forest rents (% of GDP)', fontsize=14)
+plt.title('Gaussian Mixture Model Clustering plot', fontsize=16)
+ax.legend(fontsize=12)
+
+# Add annotation for the cluster centers
+centers = gmm.means_
+for i, center in enumerate(centers):
+    ax.annotate(f'Cluster {i+1} center: {center[0]:,.2f}', xy=(i+1, center[0]), xytext=(6, 0),
+                textcoords="offset points", ha='left', va='center', fontsize=12, color=colors[i])
+
+plt.show()
+
+
+
+# Extract Forest rents column and normalize the data
+X = df['Forest rents (% of GDP)'].values.reshape(-1, 1)
+X_norm = StandardScaler().fit_transform(X)
+
+# Perform Gaussian Mixture Model clustering with n_clusters=4
+gmm = GaussianMixture(n_components=4, random_state=42)
+gmm.fit(X_norm)
+df['Cluster'] = gmm.predict(X_norm)
+
+# Print the cluster members
+for cluster in range(4):
+    cluster_members = df[df['Cluster'] == cluster]['Country'].values
+    print(f'Cluster {cluster+1} members:')
+    print(', '.join(cluster_members))
+    print()
+
+
+import pandas as pd
+
+# Load the dataset into a pandas DataFrame
+df = pd.read_csv('API_AG.LND.FRST.ZS_DS2_en_csv_v2_5358376.csv', skiprows=4)
+
+# Select only the necessary data for fitting analysis
+df = df[['Country Name', 'Country Code', 'Indicator Name', 'Indicator Code', *map(str, range(1990, 2021))]]  
+
+# Rename columns to simpler names
+df.columns = ['Country', 'Code', 'Indicator', 'IndicatorCode', *range(1990, 2021)] 
+
+# Melt the DataFrame to transform the columns into rows
+df_melted = pd.melt(df, id_vars=['Country', 'Code', 'Indicator', 'IndicatorCode'], var_name='Year', value_name='Value') 
+
+# Drop rows with missing values
+df_cleaned = df_melted.dropna()  
+
+# Save the cleaned data to a new CSV file
+df_cleaned.to_csv('fitting_data.csv', index=False)
+
+import pandas as pd
+import matplotlib.pyplot as plt
+
+# Load the cleaned dataset
+df = pd.read_csv('fitting_data.csv')
+
+# Select a sample of four countries
+countries = ['Russian Federation', 'Brazil', 'United States', 'Canada']
+sample_data = df[df['Country'].isin(countries)]
+
+# Pivot the data to have years as columns
+pivot_data = sample_data.pivot(index='Country', columns='Year', values='Value')
+
+# Plot the forest area for the sample countries
+plt.figure(figsize=(12, 8))
+for country in countries:
+    plt.plot(pivot_data.columns, pivot_data.loc[country], label=country)
+
+plt.xlabel('Year', fontsize=14)
+plt.ylabel('Forest area (% of land area)', fontsize=14)
+plt.title('Forest Area for Sample Countries', fontsize=16)
+plt.legend(fontsize=12)
+plt.grid(True)
+plt.show()
+
+
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+
+# Load the cleaned dataset
+df = pd.read_csv('fitting_data.csv')
+
+# Filter data for Nigeria
+brazil_data = df[df['Country'] == 'Brazil']
+
+# Extract the necessary columns
+years = brazil_data['Year'].values
+values = brazil_data['Value'].values
+
+# Fit a polynomial curve to the data
+coeffs = np.polyfit(years, values, deg=2)
+poly_func = np.poly1d(coeffs)
+
+# Calculate the residuals
+residuals = values - poly_func(years)
+
+# Calculate the standard deviation of the residuals
+std_dev = np.std(residuals)
+
+# Generate predictions for future years
+future_years = np.arange(years.min(), years.max() + 21)  # Predict for 20 additional years
+predicted_values = poly_func(future_years)
+
+# Calculate confidence ranges
+sigma = np.sqrt(np.diag(pcov))
+lower, upper = err_ranges(future_years, polynomial_model, popt, sigma)
+
+# Plot the best fitting function and confidence range
+plt.figure(figsize=(12, 8), dpi=80)  # Set fixed dimensions for the figure
+plt.plot(years, values, 'ko', label='Actual Data')
+plt.plot(future_years, predicted_values, 'r-', label='Best Fitting Function')
+plt.fill_between(future_years, lower_bound, upper_bound, color='gray', alpha=0.4, label='Confidence Range')
+plt.xlabel('Year', fontsize=14)
+plt.ylabel('Forest area (% of land area)', fontsize=14)
+plt.title('Polynomial Model Fit for Brazil', fontsize=16)
+plt.legend(fontsize=12)
+plt.grid(True)
+plt.show()
+
+
 
 
 
